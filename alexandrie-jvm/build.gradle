@@ -1,23 +1,51 @@
 buildscript {
-    ext.kotlin_version = '1.2.0'
 
+    ext {
+        kotlinVersion = '1.2.10'
+        springBootVersion = '1.5.9.RELEASE'
+    }
     repositories {
         mavenCentral()
     }
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
     }
 }
 apply plugin: 'kotlin-platform-jvm'
+apply plugin: 'kotlin-spring'
+apply plugin: 'org.springframework.boot'
+
 
 repositories {
     mavenCentral()
 }
 
+test {
+    testLogging.showStandardStreams = true
+    systemProperties System.getProperties()
+}
+
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     expectedBy project(":")
-    testCompile "junit:junit:4.12"
+
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+    compile('org.springframework.boot:spring-boot-starter-actuator')
+    compile('org.springframework.boot:spring-boot-starter-security')
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile 'org.springframework.hateoas:spring-hateoas:0.23.0.RELEASE'
+
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+
+    testCompile "junit:junit:4.12"
+    testCompile 'io.cucumber:cucumber-java:2.3.0'
+    testCompile 'io.cucumber:cucumber-junit:2.3.0'
+    testCompile 'org.assertj:assertj-core:3.9.0'
+
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('org.springframework.security:spring-security-test')
+    testCompile('info.cukes:cucumber-spring:1.2.5')
 }

@@ -1,51 +1,109 @@
 buildscript {
-    ext.kotlin_version = '1.2.0'
+    ext.kotlin_version = '1.2.10'
 
     repositories {
         mavenCentral()
         maven { url "https://plugins.gradle.org/m2/" }
+        jcenter()
+        maven {
+            url "https://dl.bintray.com/kotlin/kotlin-eap"
+        }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.moowork.gradle:gradle-node-plugin:1.2.0'
+        classpath "org.jetbrains.kotlin:kotlin-frontend-plugin:0.0.26"
     }
 }
 
 apply plugin: 'kotlin-platform-js'
-apply plugin: 'com.moowork.node'
+apply plugin: 'org.jetbrains.kotlin.frontend'
 
 repositories {
     mavenCentral()
+    jcenter()
+    maven {
+        url 'https://dl.bintray.com/kotlin/kotlin-js-wrappers'
+    }
 }
+
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-test-js:$kotlin_version"
+    compile 'org.jetbrains:kotlin-react:16.2.0-pre.17-kotlin-1.2.0'
+    compile 'org.jetbrains:kotlin-react-dom:16.2.0-pre.17-kotlin-1.2.0'
+    compile 'org.jetbrains:kotlin-extensions:1.0.0-pre.17-kotlin-1.2.0'
+    compile "org.jetbrains.kotlinx:kotlinx-html-js:0.6.8"
+    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core-js:0.21'
     expectedBy project(":")
-    testCompile "org.jetbrains.kotlin:kotlin-test-js:$kotlin_version"
 }
 
+// needed because webpack launch happens in build and the config file must be next to the node_modules
+task copyConfiguration(type: Copy) {
+    from "config"
+    into "$buildDir/config"
+}
 
-[compileKotlin2Js, compileTestKotlin2Js]*.configure {
+kotlinFrontend {
+
+    npm {
+        dependency("react", "^16.2.0")
+        dependency("react-dom", "^16.2.0")
+        devDependency("autoprefixer", "7.2.3")
+        devDependency("case-sensitive-paths-webpack-plugin", "2.1.1")
+        devDependency("chalk", "2.3.0")
+        devDependency("css-loader", "0.28.7")
+        devDependency("dotenv", "4.0.0")
+        devDependency("extract-text-webpack-plugin", "3.0.2")
+        devDependency("file-loader", "1.1.6")
+        devDependency("fs-extra", "5.0.0")
+        devDependency("html-webpack-plugin", "2.30.1")
+        devDependency("object-assign", "4.1.1")
+        devDependency("postcss-flexbugs-fixes", "3.2.0")
+        devDependency("postcss-loader", "2.0.9")
+        devDependency("promise", "8.0.1")
+        devDependency("react-dev-utils", "^4.1.0")
+        devDependency("react-error-overlay", "^2.0.2")
+        devDependency("source-map-loader", "0.2.3")
+        devDependency("style-loader", "0.19.1")
+        devDependency("url-loader", "0.6.2")
+        devDependency("webpack", "^3.7.1")
+        devDependency("webpack-dev-server", "2.9.7")
+        devDependency("webpack-manifest-plugin", "1.3.2")
+        devDependency("whatwg-fetch", "2.0.3")
+        devDependency("karma-firefox-launcher", "1.1.0")
+        devDependency("karma-webpack", "2.0.9")
+        devDependency("karma-sourcemap-loader", "0.3.7")
+        devDependency("enzyme")
+        devDependency("enzyme-adapter-react-16")
+    }
+
+    webpackBundle {
+        webpackConfigFile = "$buildDir/config/webpack.config.js"
+    }
+
+    karma {
+        customConfigFile = "$buildDir/config/karma.conf.js"
+    }
+}
+
+[compileKotlin2Js,compileTestKotlin2Js]*.configure {
+    kotlinOptions.metaInfo = true
+    kotlinOptions.sourceMap = true
     kotlinOptions.moduleKind = "commonjs"
 }
 
-task setupJSEnvForTests(type: Copy, dependsOn: compileKotlin2Js) {
-    from compileKotlin2Js.destinationDir
-
-    configurations.testCompile.each {
-        from zipTree(it.absolutePath).matching { include '*.js' }
+tasks.whenTaskAdded { t ->
+    if (t.name == "karma-run-single") {
+        t.outputs.upToDateWhen { false }
     }
-
-    into "${buildDir}/node_modules"
+    if (t.name == "webpack-config"){
+        t.dependsOn(copyConfiguration)
+    }
 }
 
-task installMocha(type: NpmTask) {
-    args = ['install', 'mocha']
+kotlin {
+    experimental {
+        coroutines "enable"
+    }
 }
-
-task runMocha(type: NodeTask, dependsOn: [installMocha, setupJSEnvForTests]) {
-    script = file('node_modules/mocha/bin/mocha')
-    args = [compileTestKotlin2Js.outputFile]
-}
-
-test.dependsOn.addAll( [compileTestKotlin2Js, runMocha])
