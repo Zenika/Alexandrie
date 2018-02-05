@@ -76,6 +76,7 @@ kotlinFrontend {
         devDependency("karma-sourcemap-loader", "0.3.7")
         devDependency("enzyme")
         devDependency("enzyme-adapter-react-16")
+        devDependency("cucumber")
     }
 
     webpackBundle {
