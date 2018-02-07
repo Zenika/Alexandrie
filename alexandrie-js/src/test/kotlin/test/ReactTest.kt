@@ -12,4 +12,5 @@ interface ReactTest {
             val adapter = Adapter()
         })
     }
+
 }

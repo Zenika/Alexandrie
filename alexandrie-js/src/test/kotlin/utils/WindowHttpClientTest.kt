@@ -5,19 +5,13 @@ import kotlinx.coroutines.experimental.asPromise
 import kotlinx.coroutines.experimental.async
 import org.w3c.fetch.RequestInit
 import org.w3c.fetch.Response
+import test.qunitTestAsync
 import utils.WindowFetcher.Method.GET
 import kotlin.js.Promise
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-
-external val QUnit: dynamic
-
-fun qunitTestAsync(block: suspend CoroutineScope.() -> Unit) {
-    QUnit.stop()
-    async(block = block).asPromise().then({ QUnit.start() }, { QUnit.start() })
-}
 
 class WindowHttpClientTest {
 

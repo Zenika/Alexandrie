@@ -12,6 +12,7 @@ external fun configure(adapter: dynamic)
 
 
 external class ShallowWrapper {
+    fun simulate(event: String, vararg args: dynamic): ShallowWrapper
     fun find(selector: String): ShallowWrapper
     fun contains(element: ReactElement?): Boolean
     fun contains(element: Array<ReactElement>): Boolean
@@ -19,6 +20,7 @@ external class ShallowWrapper {
     fun html(): String
     fun debug(): String
     val length: Int
+    fun update(): ShallowWrapper
 }
 
 external class ReactWrapper {

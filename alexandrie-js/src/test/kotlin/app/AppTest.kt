@@ -2,31 +2,38 @@ package app
 
 import env.environment
 import enzyme.shallowElement
+import fetch_mock.fetchMock
+import org.w3c.fetch.Response
+import org.w3c.fetch.ResponseInit
 import test.ReactTest
+import test.afterServerResponses
 import test.assertions.assertContains
-import test.mock.mockHttpClient
-import utils.JsonHttpClient
 import kotlin.test.Test
 
 class AppTest : ReactTest {
 
     @Test
     fun shouldContainBorrowerName() {
-        JsonHttpClient.fetcher = mockHttpClient(
-                "${environment.backRootUrl}/toto/borrower" to object {
-                    val name = "test"
-                }
-        )
+        fetchMock.get("${environment.backRootUrl}/toto/borrower", object {
+            val name = "test"
+        })
+
         val element = shallowElement { app() }
-        assertContains(element.text(), "test")
+        afterServerResponses {
+            element.update()
+            assertContains(element.text(), "test")
+        }
     }
 
     @Test
     fun shouldSayAbsentIfNoBorrowerFound() {
-        JsonHttpClient.fetcher = mockHttpClient(
-                "${environment.backRootUrl}/toto/borrower" to null
-        )
+        fetchMock.get("${environment.backRootUrl}/toto/borrower", NULL_BODY)
         val element = shallowElement { app() }
-        assertContains(element.text(), "Absent")
+        afterServerResponses {
+            element.update()
+            assertContains(element.text(), "Absent")
+        }
     }
+
+    val NULL_BODY = Response(null, ResponseInit(headers = object {}))
 }

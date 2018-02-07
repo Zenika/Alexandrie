@@ -10,3 +10,9 @@ Feature: Search for a book owner
     Given that "Bob" borrowed the book "Clean code"
     When we ask the system who has the book
     Then it should answer "Bob"
+
+  Scenario: "Bob" has returned the book "Clean code"
+    Given that "Bob" borrowed the book "Clean code"
+    And "Bob" returned the book "Clean code"
+    When we ask the system who has the book
+    Then it should answer nobody

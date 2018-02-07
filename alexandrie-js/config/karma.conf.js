@@ -7,7 +7,8 @@ module.exports = function (config) {
     config.set({
         "basePath": "./",
         "frameworks": [
-            "qunit"
+            "qunit",
+            "sinon"
         ],
         "reporters": [
             "progress",

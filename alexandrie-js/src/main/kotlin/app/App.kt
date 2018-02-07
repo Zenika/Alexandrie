@@ -1,5 +1,6 @@
 package app
 
+import com.zenika.alexandrie.books.borrow
 import env.environment
 import kotlinx.coroutines.experimental.CoroutineStart
 import kotlinx.coroutines.experimental.async
@@ -34,6 +35,7 @@ class App : RComponent<RProps, AppState>() {
         p("App-ticker") {
             ticker()
         }
+        borrow()
         p {
             +"Borrower is : ${state.borrower}"
         }

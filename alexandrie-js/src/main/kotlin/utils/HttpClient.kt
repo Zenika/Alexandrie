@@ -1,13 +1,12 @@
 package utils
 
-import utils.WindowFetcher.Method.GET
-import utils.WindowFetcher.Method.POST
-import kotlin.js.JSON.stringify
+import utils.WindowFetcher.Method.*
 
 
 interface HttpClient {
-    suspend fun <T> get(url: String, body: Any? = null, parse: (dynamic) -> T): T?
-    suspend fun <T> post(url: String, body: Any, parse: (dynamic) -> T): T?
+    suspend fun <T> get(url: URL, body: Any? = null, parse: (dynamic) -> T): T?
+    suspend fun post(url: URL, body: Any)
+    suspend fun put(url: URL, body: Any)
 }
 
 object JsonHttpClient : HttpClient {
@@ -16,7 +15,13 @@ object JsonHttpClient : HttpClient {
 
     override suspend fun <T> get(url: URL, body: Any?, parse: (dynamic) -> T): T? = fetcher.fetchJson(GET, url, body, parse)
 
-    override suspend fun <T> post(url: URL, body: Any, parse: (dynamic) -> T): T? = fetcher.fetchJson(POST, url, stringify(body), parse)
+    override suspend fun post(url: URL, body: Any) {
+        fetcher.sendJson(POST, url, body)
+    }
+
+    override suspend fun put(url: URL, body: Any) {
+        val sendJson = fetcher.sendJson(PUT, url, body)
+    }
 
 }
 

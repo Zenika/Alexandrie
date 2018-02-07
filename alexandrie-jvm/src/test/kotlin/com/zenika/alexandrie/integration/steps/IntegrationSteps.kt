@@ -2,6 +2,7 @@ package com.zenika.alexandrie.integration.steps
 
 import com.zenika.alexandrie.AlexandrieApp
 import cucumber.api.java.Before
+import cucumber.api.java.en.And
 import cucumber.api.java.en.Given
 import cucumber.api.java.en.Then
 import cucumber.api.java.en.When
@@ -44,6 +45,21 @@ class IntegrationSteps {
     @Given("""^that "([^"]*)" borrowed the book "([^"]*)"$""")
     fun `borrowed the book`(userName: String, bookName: String) {
         searchBook = bookName
+        mvc.perform(MockMvcRequestBuilders.put("/$bookName/borrower")
+                .content("""{
+                    "name":"$userName"
+                    }""".trimMargin())
+                .contentType("application/json")
+                .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+                .andExpect(MockMvcResultMatchers.status().isOk)
+    }
+
+    @And("""^"([^"]*)" returned the book "([^"]*)"$""")
+    fun `returned the book`(userName: String, bookName: String) {
+        searchBook = bookName
+        mvc.perform(MockMvcRequestBuilders.delete("/$bookName/borrower")
+                .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+                .andExpect(MockMvcResultMatchers.status().isOk)
     }
 
     @When("""^we ask the system who has the book$""")
@@ -56,6 +72,12 @@ class IntegrationSteps {
     fun `it should answer`(answer: String) {
         val result = result.andExpect(MockMvcResultMatchers.status().isOk).andReturn().response.contentAsString
         Assertions.assertThat(result).contains(answer)
+    }
+
+    @Then("""^it should answer nobody$""")
+    fun `it should answer nobody`() {
+        val result = result.andExpect(MockMvcResultMatchers.status().isOk).andReturn().response.contentAsString
+        Assertions.assertThat(result).isBlank()
     }
 
 }

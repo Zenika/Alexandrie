@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.2.10'
+    ext.kotlin_version = '1.2.21'
 
     repositories {
         mavenCentral()
@@ -76,7 +76,9 @@ kotlinFrontend {
         devDependency("karma-sourcemap-loader", "0.3.7")
         devDependency("enzyme")
         devDependency("enzyme-adapter-react-16")
-        devDependency("cucumber")
+        devDependency("sinon")
+        devDependency("karma-sinon")
+        devDependency("fetch-mock")
     }
 
     webpackBundle {
