@@ -2,7 +2,6 @@ package app
 
 import com.zenika.alexandrie.books.borrow
 import env.environment
-import kotlinx.coroutines.experimental.CoroutineStart
 import kotlinx.coroutines.experimental.async
 import logo.logo
 import react.*
@@ -42,7 +41,7 @@ class App : RComponent<RProps, AppState>() {
     }
 
     override fun componentDidMount() {
-        async(start = CoroutineStart.UNDISPATCHED) {
+        async {
             val name: String? = JsonHttpClient.get("${environment.backRootUrl}/toto/borrower") {
                 it.name as String
             }

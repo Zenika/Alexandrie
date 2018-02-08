@@ -1,7 +1,6 @@
 package com.zenika.alexandrie.books
 
 import env.environment
-import kotlinx.coroutines.experimental.CoroutineStart
 import kotlinx.coroutines.experimental.async
 import kotlinx.html.ButtonType.reset
 import kotlinx.html.InputType.text
@@ -79,7 +78,7 @@ class Borrow : RComponent<RProps, BorrowState>() {
     }
 
     private fun borrow() {
-        async(start = CoroutineStart.UNDISPATCHED) {
+        async {
             JsonHttpClient.put("${environment.backRootUrl}/${state.title}/borrower", Borrower(state.name))
             setState {
                 sent = true
