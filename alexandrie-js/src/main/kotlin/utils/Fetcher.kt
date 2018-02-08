@@ -37,7 +37,7 @@ object WindowFetcher : JsonFetcher {
     suspend override fun sendJson(method: Method, url: URL, body: Any?): Response? {
         return fetcher.fetch(url, object : RequestInit {
             override var method: String? = method.name
-            override var body: dynamic = stringify(body)
+            override var body: dynamic = body?.let { stringify(it) }
             override var credentials: RequestCredentials? = "same-origin".asDynamic()
             override var headers: dynamic = json(
                     "Accept" to "application/json",
@@ -48,16 +48,7 @@ object WindowFetcher : JsonFetcher {
     }
 
     override suspend fun <T> fetchJson(method: Method, url: URL, body: Any?, parse: (dynamic) -> T): T? {
-        val response: Response? = fetcher.fetch(url, object : RequestInit {
-            override var method: String? = method.name
-            override var body: dynamic = body?.let { stringify(it) }
-            override var credentials: RequestCredentials? = "same-origin".asDynamic()
-            override var headers: dynamic = json(
-                    "Accept" to "application/json",
-                    "Content-type" to "application/json")
-        }).catch {
-            return@catch null
-        }.await()
+        val response: Response? = sendJson(method, url, body)
         return response?.json()?.await()?.let(parse)
     }
 }
