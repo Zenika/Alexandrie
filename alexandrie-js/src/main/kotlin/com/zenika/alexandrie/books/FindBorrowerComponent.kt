@@ -14,38 +14,19 @@ import react.dom.*
 import utils.JsonHttpClient
 import utils.usingValue
 
-interface BorrowState : RState {
-    var name: String
+interface FindBorrowerComponentState : RState {
+    var borrower: Borrower?
     var title: String
     var sent: Boolean
 }
 
-class Borrow : RComponent<RProps, BorrowState>() {
+class FindBorrowerComponent : RComponent<RProps, FindBorrowerComponentState>() {
 
     override fun RBuilder.render() {
         form {
-            val submit: (Event) -> Unit = { this@Borrow.borrow() }
+            val submit: (Event) -> Unit = { this@FindBorrowerComponent.borrower() }
             attrs {
                 onSubmitFunction = submit
-            }
-            div {
-                label {
-                    attrs.htmlFor = "name"
-                    +"Name"
-                }
-                input(text) {
-                    attrs {
-                        id = "name"
-                        name = "name"
-                        placeholder = "Your Name"
-                        onChangeFunction = usingValue {
-                            setState {
-                                sent = false
-                                name = it
-                            }
-                        }
-                    }
-                }
             }
             div {
                 label {
@@ -71,25 +52,28 @@ class Borrow : RComponent<RProps, BorrowState>() {
                     onClickFunction = submit
                     type = reset
                 }
-                +"Borrow"
+                +"Who borrowed ?"
             }
             if (state.sent) {
                 p {
-                    +"${state.name} borrowed ${state.title}"
+                    +"${state.borrower?.name ?: "Nobody"} borrowed ${state.title}"
                 }
             }
         }
     }
 
-    private fun borrow() {
+    private fun borrower() {
         async {
-            JsonHttpClient.put("${environment.backRootUrl}/${state.title}/borrower", Borrower(state.name))
+            val borrower = JsonHttpClient.get("${environment.backRootUrl}/${state.title}/borrower") {
+                Borrower(it.borrower.name)
+            }
             setState {
                 sent = true
+                this.borrower = borrower
             }
         }
     }
 }
 
-fun RBuilder.borrow() = child(Borrow::class) {}
+fun RBuilder.findBorrower() = child(FindBorrowerComponent::class) {}
 

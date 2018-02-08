@@ -1,16 +1,17 @@
 package app
 
 import com.zenika.alexandrie.books.borrow
-import env.environment
-import kotlinx.coroutines.experimental.async
+import com.zenika.alexandrie.books.findBorrower
 import logo.logo
-import react.*
+import react.RBuilder
+import react.RComponent
+import react.RProps
+import react.RState
 import react.dom.code
 import react.dom.div
 import react.dom.h1
 import react.dom.p
 import ticker.ticker
-import utils.JsonHttpClient
 
 
 interface AppState : RState {
@@ -35,20 +36,7 @@ class App : RComponent<RProps, AppState>() {
             ticker()
         }
         borrow()
-        p {
-            +"Borrower is : ${state.borrower}"
-        }
-    }
-
-    override fun componentDidMount() {
-        async {
-            val name: String? = JsonHttpClient.get("${environment.backRootUrl}/toto/borrower") {
-                it.name as String
-            }
-            setState {
-                borrower = name ?: "Absent"
-            }
-        }
+        findBorrower()
     }
 
 }

@@ -20,7 +20,7 @@ object JsonHttpClient : HttpClient {
     }
 
     override suspend fun put(url: URL, body: Any) {
-        val sendJson = fetcher.sendJson(PUT, url, body)
+        fetcher.sendJson(PUT, url, body)
     }
 
 }

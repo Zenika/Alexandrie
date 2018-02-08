@@ -50,7 +50,7 @@ object WindowFetcher : JsonFetcher {
     override suspend fun <T> fetchJson(method: Method, url: URL, body: Any?, parse: (dynamic) -> T): T? {
         val response: Response? = fetcher.fetch(url, object : RequestInit {
             override var method: String? = method.name
-            override var body: dynamic = stringify(body)
+            override var body: dynamic = body?.let { stringify(it) }
             override var credentials: RequestCredentials? = "same-origin".asDynamic()
             override var headers: dynamic = json(
                     "Accept" to "application/json",
