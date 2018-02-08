@@ -21,9 +21,7 @@ fun main(args: Array<String>) {
 @Configuration
 class Configuration{
     @Bean
-    fun kotlinJackson(): Module {
-        return KotlinModule()
-    }
+    fun kotlinJackson(): Module = KotlinModule()
 
 }
 

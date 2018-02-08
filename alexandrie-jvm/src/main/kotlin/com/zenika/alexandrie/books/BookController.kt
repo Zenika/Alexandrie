@@ -10,8 +10,8 @@ class BookController(private val findBorrower: FindBorrower,
 
     @CrossOrigin(origins = ["http://localhost:8088"])
     @RequestMapping("/{title}/borrower", method = [GET])
-    fun borrower(@PathVariable title: String): ResourceBorrower? {
-        return findBorrower(Book(title))?.let { ResourceBorrower(it) }
+    fun borrower(@PathVariable title: String): ResourceBorrower {
+        return ResourceBorrower(findBorrower(Book(title)))
     }
 
     @CrossOrigin(origins = ["http://localhost:8088"])
@@ -29,4 +29,4 @@ class BookController(private val findBorrower: FindBorrower,
 
 }
 
-data class ResourceBorrower(val borrower: Borrower) : ResourceSupport()
+data class ResourceBorrower(val borrower: Borrower?) : ResourceSupport()

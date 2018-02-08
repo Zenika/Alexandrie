@@ -7,6 +7,7 @@ import cucumber.api.java.en.Given
 import cucumber.api.java.en.Then
 import cucumber.api.java.en.When
 import org.assertj.core.api.Assertions
+import org.hamcrest.core.IsNull
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers
@@ -76,8 +77,10 @@ class IntegrationSteps {
 
     @Then("""^it should answer nobody$""")
     fun `it should answer nobody`() {
-        val result = result.andExpect(MockMvcResultMatchers.status().isOk).andReturn().response.contentAsString
-        Assertions.assertThat(result).isBlank()
+        result.andExpect(MockMvcResultMatchers.status().isOk).andExpect(
+                MockMvcResultMatchers.jsonPath("borrower")
+                        .value(IsNull.nullValue())
+        )
     }
 
 }

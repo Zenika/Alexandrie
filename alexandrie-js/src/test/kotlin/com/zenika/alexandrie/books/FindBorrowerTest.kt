@@ -6,28 +6,17 @@ import enzyme.changeTo
 import enzyme.findInput
 import enzyme.shallowElement
 import fetch_mock.fetchMock
-import org.w3c.fetch.Response
-import org.w3c.fetch.ResponseInit
 import test.ReactTest
 import test.afterServerResponses
 import test.assertions.assertContains
+import test.hateoasResponse
 import kotlin.test.Test
 
 class FindBorrowerTest : ReactTest {
 
-    val NULL_BODY = Response(null, ResponseInit(headers = object {}))
-
-    fun hatoesResponse(pair: Pair<String, Any?>) {
-        val result = object {
-            val links = Array(0, { "" })
-        }.asDynamic()
-        result[pair.first] = pair.second
-        return result
-    }
-
     @Test
     fun shouldPrintBorrower() {
-        fetchMock.get("${environment.backRootUrl}/Clean code/borrower", hatoesResponse("borrower" to Borrower("Xavier")))
+        fetchMock.getOnce("${environment.backRootUrl}/Clean code/borrower", hateoasResponse("borrower" to Borrower("Xavier")))
         val element = shallowElement { findBorrower() }
 
         element.setTitle("Clean code")
@@ -41,7 +30,7 @@ class FindBorrowerTest : ReactTest {
 
     @Test
     fun shouldSayNobodyBorrowedBook() {
-        fetchMock.get("${environment.backRootUrl}/Clean code/borrower", NULL_BODY)
+        fetchMock.getOnce("${environment.backRootUrl}/Clean code/borrower", hateoasResponse("borrower" to null))
         val element = shallowElement { findBorrower() }
 
         element.setTitle("Clean code")

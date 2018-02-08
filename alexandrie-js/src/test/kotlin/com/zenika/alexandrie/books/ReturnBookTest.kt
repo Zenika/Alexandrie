@@ -9,29 +9,23 @@ import fetch_mock.fetchMock
 import test.NULL_BODY
 import test.ReactTest
 import test.afterServerResponses
-import test.lastPutBody
-import kotlin.js.JSON.stringify
+import utils.WindowFetcher
 import kotlin.test.Test
-import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
-class BorrowTest : ReactTest {
-
+class ReturnBookTest : ReactTest {
 
     @Test
-    fun shouldSendARequestAskingForBorrowing() {
-        fetchMock.putOnce("${environment.backRootUrl}/Clean code/borrower", NULL_BODY)
-        val element = shallowElement { borrow() }
+    fun shouldSendARequestReturningBook() {
+        fetchMock.deleteOnce("${environment.backRootUrl}/Clean code/borrower", NULL_BODY)
+        val element = shallowElement { returnBook() }
 
-        element.setName("Xavier")
         element.setTitle("Clean code")
         element.validate()
         afterServerResponses {
-            val body = fetchMock.lastPutBody("${environment.backRootUrl}/Clean code/borrower")
-            assertEquals(stringify(Borrower("Xavier")), body)
+            assertTrue(fetchMock.called("${environment.backRootUrl}/Clean code/borrower", WindowFetcher.Method.DELETE),"delete method should be called")
         }
     }
-
-    private fun ShallowWrapper.setName(name: String) = findInput("name").changeTo(name)
 
     private fun ShallowWrapper.setTitle(title: String) = findInput("book").changeTo(title)
 

@@ -14,17 +14,16 @@ import react.dom.*
 import utils.JsonHttpClient
 import utils.usingValue
 
-interface FindBorrowerComponentState : RState {
-    var borrower: Borrower?
+interface ReturnBookState : RState {
     var title: String
     var sent: Boolean
 }
 
-class FindBorrowerComponent : RComponent<RProps, FindBorrowerComponentState>() {
+class ReturnBook : RComponent<RProps, FindBorrowerComponentState>() {
 
     override fun RBuilder.render() {
         form {
-            val submit: (Event) -> Unit = { this@FindBorrowerComponent.borrower() }
+            val submit: (Event) -> Unit = { this@ReturnBook.returnBook() }
             attrs {
                 onSubmitFunction = submit
             }
@@ -52,28 +51,25 @@ class FindBorrowerComponent : RComponent<RProps, FindBorrowerComponentState>() {
                     onClickFunction = submit
                     type = reset
                 }
-                +"Who borrowed ?"
+                +"Return book"
             }
             if (state.sent) {
                 p {
-                    +"${state.borrower?.name ?: "Nobody"} borrowed ${state.title}"
+                    +"${state.title} returned"
                 }
             }
         }
     }
 
-    private fun borrower() {
+    private fun returnBook() {
         async {
-            val borrower = JsonHttpClient.get("${environment.backRootUrl}/${state.title}/borrower") {
-                it.borrower
-            }
+            JsonHttpClient.delete("${environment.backRootUrl}/${state.title}/borrower")
             setState {
                 sent = true
-                this.borrower = borrower
             }
         }
     }
 }
 
-fun RBuilder.findBorrower() = child(FindBorrowerComponent::class) {}
+fun RBuilder.returnBook() = child(ReturnBook::class) {}
 
