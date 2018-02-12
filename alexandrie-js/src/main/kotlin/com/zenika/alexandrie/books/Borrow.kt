@@ -1,5 +1,6 @@
 package com.zenika.alexandrie.books
 
+import com.zenika.alexandrie.books.Borrow.Companion.sendBorrow
 import env.environment
 import kotlinx.coroutines.experimental.async
 import kotlinx.html.ButtonType.reset
@@ -20,7 +21,15 @@ interface BorrowState : RState {
     var sent: Boolean
 }
 
-class Borrow : RComponent<RProps, BorrowState>() {
+interface BorrowProps : RProps {
+    var borrowFunction: suspend (Book, Borrower) -> Boolean
+}
+
+private val defaultProps: BorrowProps.() -> Unit = {
+    borrowFunction = { a, b -> sendBorrow(a, b) }
+}
+
+class Borrow : RComponent<BorrowProps, BorrowState>() {
 
     override fun RBuilder.render() {
         form {
@@ -83,13 +92,22 @@ class Borrow : RComponent<RProps, BorrowState>() {
 
     private fun borrow() {
         async {
-            JsonHttpClient.put("${environment.backRootUrl}/${state.title}/borrower", Borrower(state.name))
+            val borrowed = props.borrowFunction(Book(state.title), Borrower(state.name))
             setState {
-                sent = true
+                sent = borrowed
             }
+        }
+    }
+
+    companion object {
+        suspend fun sendBorrow(book: Book, borrower: Borrower): Boolean {
+            JsonHttpClient.put("${environment.backRootUrl}/${book.title}/borrower", borrower)
+            return true
         }
     }
 }
 
-fun RBuilder.borrow() = child(Borrow::class) {}
+fun RBuilder.borrow(propsFunction: BorrowProps.() -> Unit = defaultProps) = child(Borrow::class) {
+    attrs(propsFunction)
+}
 
