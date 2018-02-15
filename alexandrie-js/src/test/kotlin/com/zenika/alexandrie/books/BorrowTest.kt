@@ -46,6 +46,8 @@ class BorrowTest : ReactTest {
             val body = fetchMock.lastPutBody("${environment.backRootUrl}/Clean code/borrower")
             assertEquals(stringify(Borrower("Xavier")), body)
             assertTrue(borrowed, "should confirm borrowing on success")
+            fetchMock.reset()
+            fetchMock.restore()
         }
     }
 

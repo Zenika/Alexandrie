@@ -19,7 +19,11 @@ interface ReturnBookState : RState {
     var sent: Boolean
 }
 
-class ReturnBook : RComponent<RProps, FindBorrowerComponentState>() {
+interface ReturnBookProps : RProps {
+    var returnFunction: suspend (Book) -> Boolean
+}
+
+class ReturnBook : RComponent<ReturnBookProps, FindBorrowerComponentState>() {
 
     override fun RBuilder.render() {
         form {
@@ -63,13 +67,26 @@ class ReturnBook : RComponent<RProps, FindBorrowerComponentState>() {
 
     private fun returnBook() {
         async {
-            JsonHttpClient.delete("${environment.backRootUrl}/${state.title}/borrower")
+            val deleted = props.returnFunction(Book(state.title))
             setState {
-                sent = true
+                sent = deleted
             }
+        }
+    }
+
+    companion object {
+        suspend fun doReturn(book: Book): Boolean {
+            JsonHttpClient.delete("${environment.backRootUrl}/${book.title}/borrower")
+            return true
         }
     }
 }
 
-fun RBuilder.returnBook() = child(ReturnBook::class) {}
+private val defaultProps: ReturnBookProps.() -> Unit = {
+    returnFunction = { b -> ReturnBook.doReturn(b) }
+}
+
+fun RBuilder.returnBook(props: ReturnBookProps.() -> Unit = defaultProps) = child(ReturnBook::class) {
+    attrs(props)
+}
 

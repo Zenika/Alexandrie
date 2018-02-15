@@ -1,5 +1,6 @@
 package com.zenika.alexandrie.books
 
+import com.zenika.alexandrie.books.FindBorrowerComponent.Companion.findBorrowerOf
 import env.environment
 import kotlinx.coroutines.experimental.async
 import kotlinx.html.ButtonType.reset
@@ -20,7 +21,11 @@ interface FindBorrowerComponentState : RState {
     var sent: Boolean
 }
 
-class FindBorrowerComponent : RComponent<RProps, FindBorrowerComponentState>() {
+interface FindBorrowerComponentProps : RProps {
+    var findBorrowerFunction: suspend (Book) -> Borrower?
+}
+
+class FindBorrowerComponent : RComponent<FindBorrowerComponentProps, FindBorrowerComponentState>() {
 
     override fun RBuilder.render() {
         form {
@@ -64,16 +69,28 @@ class FindBorrowerComponent : RComponent<RProps, FindBorrowerComponentState>() {
 
     private fun borrower() {
         async {
-            val borrower = JsonHttpClient.get("${environment.backRootUrl}/${state.title}/borrower") {
-                it.borrower
-            }
+            val borrower = props.findBorrowerFunction(Book(state.title))
             setState {
                 sent = true
                 this.borrower = borrower
             }
         }
     }
+
+    companion object {
+        suspend fun findBorrowerOf(book: Book): Borrower? {
+            return JsonHttpClient.get("${environment.backRootUrl}/${book.title}/borrower") {
+                it.borrower as Borrower
+            }
+        }
+    }
 }
 
-fun RBuilder.findBorrower() = child(FindBorrowerComponent::class) {}
+private val defaultProps: FindBorrowerComponentProps.() -> Unit = {
+    findBorrowerFunction = { b -> findBorrowerOf(b) }
+}
+
+fun RBuilder.findBorrower(props: FindBorrowerComponentProps.() -> Unit = defaultProps) = child(FindBorrowerComponent::class) {
+    attrs(props)
+}
 

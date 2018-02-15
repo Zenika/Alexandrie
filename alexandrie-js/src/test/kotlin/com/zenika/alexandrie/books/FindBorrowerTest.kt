@@ -7,22 +7,51 @@ import enzyme.findInput
 import enzyme.shallowElement
 import fetch_mock.fetchMock
 import test.ReactTest
-import test.afterServerResponses
 import test.assertions.assertContains
 import test.hateoasResponse
+import test.qunitTestAsync
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class FindBorrowerTest : ReactTest {
 
     @Test
-    fun shouldPrintBorrower() {
+    fun shouldGetBorrower() {
         fetchMock.getOnce("${environment.backRootUrl}/Clean code/borrower", hateoasResponse("borrower" to Borrower("Xavier")))
-        val element = shallowElement { findBorrower() }
+
+        qunitTestAsync {
+            val borrower = FindBorrowerComponent.findBorrowerOf(Book("Clean code"))
+            assertEquals(Borrower("Xavier"), borrower)
+            fetchMock.reset()
+            fetchMock.restore()
+        }
+    }
+
+    @Test
+    fun shouldKeepNull() {
+        fetchMock.getOnce("${environment.backRootUrl}/Clean code/borrower", hateoasResponse("borrower" to null))
+
+        qunitTestAsync {
+            val borrower = FindBorrowerComponent.findBorrowerOf(Book("Clean code"))
+            assertNull(borrower)
+            fetchMock.reset()
+            fetchMock.restore()
+        }
+    }
+
+    @Test
+    fun shouldPrintBorrower() {
+        val element = shallowElement {
+            findBorrower {
+                findBorrowerFunction = { Borrower("Xavier") }
+            }
+        }
 
         element.setTitle("Clean code")
         element.validate()
 
-        afterServerResponses {
+        qunitTestAsync {
             element.update()
             assertContains(element.text(), "Xavier borrowed Clean code")
         }
@@ -30,13 +59,16 @@ class FindBorrowerTest : ReactTest {
 
     @Test
     fun shouldSayNobodyBorrowedBook() {
-        fetchMock.getOnce("${environment.backRootUrl}/Clean code/borrower", hateoasResponse("borrower" to null))
-        val element = shallowElement { findBorrower() }
+        val element = shallowElement {
+            findBorrower {
+                findBorrowerFunction = { null }
+            }
+        }
 
         element.setTitle("Clean code")
         element.validate()
 
-        afterServerResponses {
+        qunitTestAsync {
             element.update()
             assertContains(element.text(), "Nobody borrowed Clean code")
         }
